@@ -1,4 +1,5 @@
 import customtkinter
+from math import sqrt
 
 class Calc(customtkinter.CTk):
     _btn = [
@@ -39,12 +40,14 @@ class Calc(customtkinter.CTk):
                 self.grid_columnconfigure(j, weight=1)
         
     def button_callback(self, btn_txt):
-        if btn_txt != "=" and btn_txt != "\r" and btn_txt != "C" and btn_txt != "\b":
+        if btn_txt != "=" and btn_txt != "\r" and btn_txt != "C" and btn_txt != "\b" and btn_txt != "\u221A":
             self.append_button(btn_txt)
         elif btn_txt == "C":
             self.clear_input() 
         elif btn_txt == "\b":
             self.remove_last_char()
+        elif btn_txt == "\u221A":
+            self.sqrt_btn()
         else:
             self.evaluate_expression()
 
@@ -63,6 +66,7 @@ class Calc(customtkinter.CTk):
                     result = eval(str_expr)
                     self.input_label.configure(text=f"{result}")
                     self._pressed_buttons = list(str(result))
+                    #self._pressed_buttons.clear()
                     
             except ZeroDivisionError:
                 self.input_label.configure(text="Error: Divide by zero")
@@ -91,6 +95,32 @@ class Calc(customtkinter.CTk):
     def remove_last_char(self):
         self._pressed_buttons.pop()
         self.update_input_label()
+
+    # def sqrt_btn(self):
+    #     if self._pressed_buttons[-1] == "\u221A":
+    #         try:
+    #             self.remove_last_char()
+    #             str_expr = "".join(self._pressed_buttons)
+    #             result = sqrt(str_expr)
+    #             self.input_label.configure(text=f"{result}")
+    #             self._pressed_buttons = list(str(result))
+    #         except Exception as e:
+    #             self.input_label.configure(text=f"Error: {e}")
+
+    def sqrt_btn(self):
+        try:
+            str_expr = "".join(self._pressed_buttons)
+            result = eval(str_expr)
+            
+            sqrt_result = sqrt(result)
+            sqrt_result = round(sqrt_result, 10)
+            
+            self.input_label.configure(text=f"{sqrt_result}")
+            self._pressed_buttons.clear()
+            self._pressed_buttons.append(str(sqrt_result))
+            
+        except Exception as e:
+            self.input_label.configure(text=f"Error: {e}")
 
     
 

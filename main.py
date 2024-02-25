@@ -1,21 +1,21 @@
 import customtkinter
 
 class Calc(customtkinter.CTk):
-
-    __btn = [
+    _btn = [
+        ["(", ")", "\u221A", "x²"],
         ["7", "8", "9", "-"],
         ["4", "5", "6", "+"],
         ["1", "2", "3", "/"],
         [".", "0", "=", "*"]
     ]
 
-    __pressed_buttons = []
+    _pressed_buttons = []
 
     def __init__(self):
         super().__init__()
 
-        __window_width = self.winfo_width()
-        __window_height = self.winfo_height()
+        _window_width = self.winfo_width()
+        _window_height = self.winfo_height()
 
         self.title("CTk Calculator")
 
@@ -24,16 +24,16 @@ class Calc(customtkinter.CTk):
         
         self.bind('<Key>', self.key_pressed)
 
-        button = customtkinter.CTkButton(self, text="C", command=lambda btn_txt="C": self.button_callback(btn_txt), width=(__window_width/4), height=(__window_height/4))
+        button = customtkinter.CTkButton(self, text="C", command=lambda btn_txt="C": self.button_callback(btn_txt), width=(_window_width/4), height=(_window_height/4))
         button.grid(row=0, column=0, columnspan=1, pady=2, padx=2, sticky="nesw")
 
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(0, weight=1)
         
 
-        for i, row in enumerate(self.__btn):
+        for i, row in enumerate(self._btn):
             for j, text in enumerate(row):
-                button = customtkinter.CTkButton(self, text=text, command=lambda btn_txt=text: self.button_callback(btn_txt), width=(__window_width/4), height=(__window_height/4))
+                button = customtkinter.CTkButton(self, text=text, command=lambda btn_txt=text: self.button_callback(btn_txt), width=(_window_width/4), height=(_window_height/4))
                 button.grid(row=i+1, column=j, pady=2, padx=2, sticky="nesw")
                 self.grid_rowconfigure(i+1, weight=1)
                 self.grid_columnconfigure(j, weight=1)
@@ -49,34 +49,38 @@ class Calc(customtkinter.CTk):
             self.evaluate_expression()
 
     def append_button(self, btn_txt):
-        self.__pressed_buttons.append(btn_txt)
+        self._pressed_buttons.append(btn_txt)
         self.update_input_label()
 
     def input_is_clear(self):
-        return True if not self.__pressed_buttons else False
+        return True if not self._pressed_buttons else False
 
     def evaluate_expression(self):
         if not self.input_is_clear():
             try:
                 if self.check_equation():
-                    str_expr = "".join(self.__pressed_buttons)
+                    str_expr = "".join(self._pressed_buttons)
                     result = eval(str_expr)
                     self.input_label.configure(text=f"{result}")
-                    self.__pressed_buttons = list(str(result))
+                    self._pressed_buttons = list(str(result))
                     
+            except ZeroDivisionError:
+                self.input_label.configure(text="Error: Divide by zero")
+            except SyntaxError:
+                self.input_label.configure(text="Error: Invalid syntax")
             except Exception as e:
                 self.input_label.configure(text=f"Error: {e}")
         else:
             self.clear_input()
 
     def check_equation(self):
-        return False if self.__pressed_buttons[-1] in "+-*/." else True
+        return False if self._pressed_buttons[-1] in "+-*/." else True
 
     def update_input_label(self):
-        self.input_label.configure(text="".join(self.__pressed_buttons))
+        self.input_label.configure(text="".join(self._pressed_buttons))
 
     def clear_input(self):
-        self.__pressed_buttons.clear()
+        self._pressed_buttons.clear()
         self.update_input_label()
 
     def key_pressed(self, event):
@@ -85,8 +89,10 @@ class Calc(customtkinter.CTk):
             self.button_callback(key)
     
     def remove_last_char(self):
-        self.__pressed_buttons.pop()
+        self._pressed_buttons.pop()
         self.update_input_label()
+
+    
 
 
 if __name__=="__main__":

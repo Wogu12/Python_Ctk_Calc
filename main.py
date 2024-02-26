@@ -40,7 +40,7 @@ class Calc(customtkinter.CTk):
                 self.grid_columnconfigure(j, weight=1)
         
     def button_callback(self, btn_txt):
-        if btn_txt != "=" and btn_txt != "\r" and btn_txt != "C" and btn_txt != "\b" and btn_txt != "\u221A":
+        if btn_txt != "=" and btn_txt != "\r" and btn_txt != "C" and btn_txt != "\b" and btn_txt != "\u221A" and btn_txt != "x²":
             self.append_button(btn_txt)
         elif btn_txt == "C":
             self.clear_input() 
@@ -48,6 +48,8 @@ class Calc(customtkinter.CTk):
             self.remove_last_char()
         elif btn_txt == "\u221A":
             self.sqrt_btn()
+        elif btn_txt == "x²":
+            self.power_btn()
         else:
             self.evaluate_expression()
 
@@ -62,11 +64,10 @@ class Calc(customtkinter.CTk):
         if not self.input_is_clear():
             try:
                 if self.check_equation():
-                    str_expr = "".join(self._pressed_buttons)
-                    result = eval(str_expr)
-                    self.input_label.configure(text=f"{result}")
+                    result = eval(self.arr_to_str())
+                    result = self.is_even(result)
+                    self.write_in_input(result)
                     self._pressed_buttons = list(str(result))
-                    #self._pressed_buttons.clear()
                     
             except ZeroDivisionError:
                 self.input_label.configure(text="Error: Divide by zero")
@@ -81,7 +82,7 @@ class Calc(customtkinter.CTk):
         return False if self._pressed_buttons[-1] in "+-*/." else True
 
     def update_input_label(self):
-        self.input_label.configure(text="".join(self._pressed_buttons))
+        self.input_label.configure(text=self.arr_to_str())
 
     def clear_input(self):
         self._pressed_buttons.clear()
@@ -96,33 +97,49 @@ class Calc(customtkinter.CTk):
         self._pressed_buttons.pop()
         self.update_input_label()
 
-    # def sqrt_btn(self):
-    #     if self._pressed_buttons[-1] == "\u221A":
-    #         try:
-    #             self.remove_last_char()
-    #             str_expr = "".join(self._pressed_buttons)
-    #             result = sqrt(str_expr)
-    #             self.input_label.configure(text=f"{result}")
-    #             self._pressed_buttons = list(str(result))
-    #         except Exception as e:
-    #             self.input_label.configure(text=f"Error: {e}")
+    def arr_to_str(self):
+        str_expr = "".join(self._pressed_buttons)
+        return str_expr
+    
+    def write_in_input(self, var):
+        self.input_label.configure(text=f"{var}")
 
     def sqrt_btn(self):
         try:
-            str_expr = "".join(self._pressed_buttons)
-            result = eval(str_expr)
+            result = eval(self.arr_to_str())
             
             sqrt_result = sqrt(result)
             sqrt_result = round(sqrt_result, 10)
-            
-            self.input_label.configure(text=f"{sqrt_result}")
+            sqrt_result = self.is_even(sqrt_result)
+            self.write_in_input(sqrt_result)
             self._pressed_buttons.clear()
             self._pressed_buttons.append(str(sqrt_result))
             
         except Exception as e:
             self.input_label.configure(text=f"Error: {e}")
 
-    
+    def power_btn(self):
+        try:
+            result = eval(self.arr_to_str())
+
+            var_scnd_power = result**2
+            var_scnd_power = round(var_scnd_power, 10)
+            var_scnd_power = self.is_even(var_scnd_power)
+            self.write_in_input(var_scnd_power)
+            self._pressed_buttons.clear()
+            self._pressed_buttons.append(str(var_scnd_power))
+
+        except Exception as e:
+            self.input_label.configure(text=f"Error: {e}")
+
+    def is_even(self, result):
+        try:
+            num_int = int(result)
+            float_num = float(result)
+            return str(num_int) if num_int == float_num else result
+        except ValueError:
+            self.input_label.configure(text="Invalid input")
+            return result
 
 
 if __name__=="__main__":
@@ -135,6 +152,7 @@ if __name__=="__main__":
 # 2. add keyboard input - DONE
 # 3. prevent wrong inputs - DONE
 # 4. add backspace option - DONE
+# 5. change eval() to something else
 # 5. add more options
 #
 ################################################

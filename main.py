@@ -1,7 +1,9 @@
 import customtkinter
 from math import sqrt
 
-class Calc(customtkinter.CTk):
+class CalcWindow(customtkinter.CTk):
+    
+
     _btn = [
         ["(", ")", "\u221A", "x²"],
         ["7", "8", "9", "-"],
@@ -25,7 +27,7 @@ class Calc(customtkinter.CTk):
         
         self.bind('<Key>', self.key_pressed)
 
-        button = customtkinter.CTkButton(self, text="C", command=lambda btn_txt="C": self.button_callback(btn_txt), width=(_window_width/4), height=(_window_height/4))
+        button = customtkinter.CTkButton(self, text="C", command=self.clear_input, width=(_window_width/4), height=(_window_height/4))
         button.grid(row=0, column=0, columnspan=1, pady=2, padx=2, sticky="nesw")
 
         self.grid_rowconfigure(0, weight=1)
@@ -40,18 +42,18 @@ class Calc(customtkinter.CTk):
                 self.grid_columnconfigure(j, weight=1)
         
     def button_callback(self, btn_txt):
-        if btn_txt != "=" and btn_txt != "\r" and btn_txt != "C" and btn_txt != "\b" and btn_txt != "\u221A" and btn_txt != "x²":
-            self.append_button(btn_txt)
-        elif btn_txt == "C":
-            self.clear_input() 
-        elif btn_txt == "\b":
-            self.remove_last_char()
-        elif btn_txt == "\u221A":
-            self.sqrt_btn()
-        elif btn_txt == "x²":
-            self.power_btn()
+        btn_action = {
+            "=": self.evaluate_expression,
+            "\r": self.evaluate_expression,
+            "\b": self.remove_last_char,
+            "\u221A": self.sqrt_btn,
+            "x²": self.power_btn
+        }
+
+        if btn_txt in btn_action:
+            btn_action[btn_txt]()
         else:
-            self.evaluate_expression()
+            self.append_button(btn_txt)
 
     def append_button(self, btn_txt):
         self._pressed_buttons.append(btn_txt)
@@ -70,11 +72,14 @@ class Calc(customtkinter.CTk):
                     self._pressed_buttons = list(str(result))
                     
             except ZeroDivisionError:
-                self.input_label.configure(text="Error: Divide by zero")
+                er_msg = "Error: Divide by zero"
+                self.write_in_input(er_msg)
             except SyntaxError:
-                self.input_label.configure(text="Error: Invalid syntax")
+                er_msg = "Error: Invalid syntax"
+                self.write_in_input(er_msg)
             except Exception as e:
-                self.input_label.configure(text=f"Error: {e}")
+                er_msg = f"Error: {e}"
+                self.write_in_input(er_msg)
         else:
             self.clear_input()
 
@@ -102,7 +107,10 @@ class Calc(customtkinter.CTk):
         return str_expr
     
     def write_in_input(self, var):
-        self.input_label.configure(text=f"{var}")
+        if isinstance(var, (int,float)):
+            self.input_label.configure(text=f"{var}")
+        else:
+            self.input_label.configure(text=var)
 
     def sqrt_btn(self):
         try:
@@ -116,7 +124,8 @@ class Calc(customtkinter.CTk):
             self._pressed_buttons.append(str(sqrt_result))
             
         except Exception as e:
-            self.input_label.configure(text=f"Error: {e}")
+            er_msg = "Error: "+e
+            self.write_in_input(er_msg)
 
     def power_btn(self):
         try:
@@ -130,7 +139,8 @@ class Calc(customtkinter.CTk):
             self._pressed_buttons.append(str(var_scnd_power))
 
         except Exception as e:
-            self.input_label.configure(text=f"Error: {e}")
+            er_msg = "Error: "+e
+            self.write_in_input(er_msg)
 
     def is_even(self, result):
         try:
@@ -138,21 +148,11 @@ class Calc(customtkinter.CTk):
             float_num = float(result)
             return str(num_int) if num_int == float_num else result
         except ValueError:
-            self.input_label.configure(text="Invalid input")
+            er_msg = "Invalid input"
+            self.write_in_input(er_msg)
             return result
 
 
 if __name__=="__main__":
-    app = Calc()
+    app = CalcWindow()
     app.mainloop()
-
-#################### TO DO ####################
-#
-# 1. make it responsive! - DONE
-# 2. add keyboard input - DONE
-# 3. prevent wrong inputs - DONE
-# 4. add backspace option - DONE
-# 5. change eval() to something else
-# 5. add more options
-#
-################################################

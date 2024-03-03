@@ -77,7 +77,7 @@ class CalcWindow(customtkinter.CTk):
         if not self.input_is_clear():
             try:
                 if self.check_equation():
-                    result = eval(self.arr_to_str())
+                    result = round(eval(self.arr_to_str()), 10)
                     result = self.is_even(result)
                     self.write_in_input(result)
                     self._pressed_buttons = list(str(result))
@@ -85,12 +85,15 @@ class CalcWindow(customtkinter.CTk):
             except ZeroDivisionError:
                 er_msg = "Error: Divide by zero"
                 self.write_in_input(er_msg)
+                raise
             except SyntaxError:
                 er_msg = "Error: Invalid syntax"
                 self.write_in_input(er_msg)
+                raise
             except Exception as e:
                 er_msg = f"Error: {e}"
                 self.write_in_input(er_msg)
+                raise
         else:
             self.clear_input()
 
